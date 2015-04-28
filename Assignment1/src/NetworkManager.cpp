@@ -9,9 +9,6 @@ NetworkManager::NetworkManager() {
 	m_initialized = false;
 	//m_clients.reserve(MAX_CLIENTS);
 	m_clientCount = 0;
-	for (int i = 0; i < MAX_CLIENTS; ++i) {
-		m_clients[i] = "";
-	}
 }
 
 NetworkManager::~NetworkManager() {
@@ -79,9 +76,7 @@ void NetworkManager::UpdateClient() {
 			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
 			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 			bsIn.Read(rakString);
-			m_clients[m_clientCount] = rakString.C_String();
-			++m_clientCount;
-			//m_clients.push_back((char*)rakString.C_String());
+			m_clients.push_back((char*)rakString.C_String());
 			char buffer[256];
 			sprintf(buffer, "%s connected to the server.\n", rakString.C_String());
 
@@ -134,7 +129,10 @@ void NetworkManager::UpdateServer() {
 			bs.Read(rakString);
 
 			sprintf(buffer, "%s connected to the server.\n", rakString.C_String());
-			//m_clients.push_back((char*)rakString.C_String());
+
+			char* pName = new char[strlen(rakString.C_String())];
+			strcpy(pName, rakString.C_String());
+			m_clients.push_back(pName);
 			ImGui::LogCustomConsole(buffer);
 
 			sprintf(outBuffer, "%s\n", rakString.C_String());

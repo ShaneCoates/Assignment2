@@ -40,8 +40,8 @@ public:
 
 	char* m_clientName;
 
-	//std::list<std::string> m_clients;
-	const char* m_clients[MAX_CLIENTS];
+	std::list<char*> m_clients;
+	//const char* m_clients[MAX_CLIENTS];
 protected:
 private:
 	
