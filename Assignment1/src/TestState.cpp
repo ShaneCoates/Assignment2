@@ -62,48 +62,40 @@ void TestState::Update(double _dt) {
 }
 void TestState::Draw() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	if (ImGui::TreeNode("Network Options"))
-	{
-		if (ImGui::Button("Start Server"))
-		{
-			if (!m_networkServer->IsInitialized())
-			{
-				m_networkServer->InitializeServer(m_serverPort, (char*)m_serverIP.c_str());
-			}
-		}
-
-		ImGui::SameLine();
-
-		if (ImGui::Button("Start Client"))
-		{
-			if (!m_networkClient->IsInitialized())
-			{
-				if (!m_clientName.empty())
-					m_networkClient->InitializeClient((char*)m_clientName.c_str(), m_serverPort, (char*)m_serverIP.c_str());
-				else
-					m_networkClient->InitializeClient(DEFAULT_NAME, m_serverPort, (char*)m_serverIP.c_str());
-			}
-		}
-
+	if (ImGui::CollapsingHeader("Network Options")) {
 		ImGui::InputText("Player Name", (char*)m_clientName.c_str(), 256);
 		ImGui::InputText("Server IP", (char*)m_serverIP.c_str(), 64);
 		ImGui::InputInt("Server Port", (int*)&m_serverPort);
-
-		bool drawList = false;
-		const char* listbox_items[MAX_CLIENTS];
-		static int listbox_item_current = 0;
-		if (m_networkClient->IsInitialized() && m_networkClient->m_clients.size() > 0) {
-			std::copy(m_networkClient->m_clients.begin(), m_networkClient->m_clients.end(), listbox_items);
-			drawList = true;
-		} else if (m_networkServer->IsInitialized() && m_networkServer->m_clients.size() > 0) {
-			std::copy(m_networkServer->m_clients.begin(), m_networkServer->m_clients.end(), listbox_items);
-			drawList = true;
+		if (ImGui::Button("Start Server")) {
+			if (!m_networkServer->IsInitialized()) {
+				m_networkServer->InitializeServer(m_serverPort, (char*)m_serverIP.c_str());
+			}
 		}
-		if (drawList) {
-			ImGui::ListBox("Clients", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 4);
+		ImGui::SameLine();
+		if (ImGui::Button("Start Client")) {
+			if (!m_networkClient->IsInitialized()) {
+				if (!m_clientName.empty()) {
+					m_networkClient->InitializeClient((char*)m_clientName.c_str(), m_serverPort, (char*)m_serverIP.c_str());
+				}
+				else {
+					m_networkClient->InitializeClient(DEFAULT_NAME, m_serverPort, (char*)m_serverIP.c_str());
+				}
+			}
 		}
-		ImGui::TreePop();
 	}
+
+	bool drawList = false;
+	const char* listbox_items[MAX_CLIENTS];
+	static int listbox_item_current = 0;
+	if (m_networkClient->IsInitialized() && m_networkClient->m_clients.size() > 0) {
+		std::copy(m_networkClient->m_clients.begin(), m_networkClient->m_clients.end(), listbox_items);
+		ImGui::ListBox("Clients", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 4);
+	}
+	else if (m_networkServer->IsInitialized() && m_networkServer->m_clients.size() > 0) {
+		std::copy(m_networkServer->m_clients.begin(), m_networkServer->m_clients.end(), listbox_items);
+		ImGui::ListBox("Clients", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 4);
+	}
+
 	ImGui::ShowCustomConsole();
 }
 
