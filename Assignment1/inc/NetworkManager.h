@@ -62,6 +62,8 @@ private:
 	char* m_ipAddress;
 
 	unsigned int m_clientCount;
+
+	bool m_sendClientList;
 };
 
 #endif

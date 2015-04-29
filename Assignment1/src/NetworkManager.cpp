@@ -9,6 +9,7 @@ NetworkManager::NetworkManager() {
 	m_initialized = false;
 	m_clientCount = 0;
 	m_clients.resize(MAX_CLIENTS, "");
+	m_sendClientList = false;
 }
 
 NetworkManager::~NetworkManager() {
@@ -43,6 +44,9 @@ void NetworkManager::Update(double _dt) {
 		} else {
 			UpdateClient();
 		}
+	}
+	if (m_sendClientList) {
+
 	}
 }
 
@@ -96,8 +100,7 @@ void NetworkManager::UpdateClient() {
 			break;
 		} case ID_CLIENT_LIST_WIPE: {
 			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
-			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-			bsIn.Read(rakString);
+			rakString.Clear();
 			m_clients.clear();
 			m_clients.resize(MAX_CLIENTS, "");
 			break;
@@ -141,7 +144,7 @@ void NetworkManager::UpdateServer() {
 			bs.IgnoreBytes(sizeof(RakNet::MessageID));
 
 			RakString rakString;
-			BitStream bsOut;
+			BitStream bsWipe;
 			char buffer[256];
 			char outBuffer[256];
 
@@ -155,15 +158,17 @@ void NetworkManager::UpdateServer() {
 			m_clients.pop_back();
 			ImGui::LogCustomConsole(buffer);
 			std::list<char*>::const_iterator pos;
-			bsOut.Write((RakNet::MessageID)ID_CLIENT_LIST_WIPE);
-			m_peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
+			bsWipe.Write((RakNet::MessageID)ID_CLIENT_LIST_WIPE);
+			m_peer->Send(&bsWipe, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
+
 			for (pos = m_clients.begin(); pos != m_clients.end(); pos++) {
 				if (*pos != "") {
+					BitStream bsClientList;
 					sprintf(outBuffer, "%s\n", *pos);
 
-					bsOut.Write((RakNet::MessageID)ID_CLIENT_LIST);
-					bsOut.Write(outBuffer);
-					m_peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
+					bsClientList.Write((RakNet::MessageID)ID_CLIENT_LIST);
+					bsClientList.Write(outBuffer);
+					m_peer->Send(&bsClientList, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
 				}
 			}
 
