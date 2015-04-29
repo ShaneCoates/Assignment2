@@ -21,7 +21,9 @@ public:
 		ID_CLIENT_MESSAGE = ID_USER_PACKET_ENUM + 3,
 		ID_SERVER_BROADCAST = ID_USER_PACKET_ENUM + 4,
 		ID_SERVER_END = ID_USER_PACKET_ENUM + 5,
-		ID_CLIENT_END = ID_USER_PACKET_ENUM + 6
+		ID_CLIENT_END = ID_USER_PACKET_ENUM + 6,
+		ID_CLIENT_LIST = ID_USER_PACKET_ENUM + 7,
+		ID_CLIENT_LIST_WIPE = ID_USER_PACKET_ENUM + 8
 	}
 	;
 	NetworkManager();
@@ -41,7 +43,6 @@ public:
 	char* m_clientName;
 
 	std::list<char*> m_clients;
-	//const char* m_clients[MAX_CLIENTS];
 protected:
 private:
 	

@@ -7,8 +7,8 @@ NetworkManager::NetworkManager() {
 	m_ipAddress = DEFAULT_IP;
 	m_clientName = DEFAULT_NAME;
 	m_initialized = false;
-	//m_clients.reserve(MAX_CLIENTS);
 	m_clientCount = 0;
+	m_clients.resize(MAX_CLIENTS, "");
 }
 
 NetworkManager::~NetworkManager() {
@@ -76,11 +76,30 @@ void NetworkManager::UpdateClient() {
 			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
 			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
 			bsIn.Read(rakString);
-			m_clients.push_back((char*)rakString.C_String());
+			char* pName = new char[strlen(rakString.C_String())];
+			strcpy(pName, rakString.C_String());
+			m_clients.push_front(pName);
+			m_clients.pop_back();
 			char buffer[256];
 			sprintf(buffer, "%s connected to the server.\n", rakString.C_String());
 
 			ImGui::LogCustomConsole(buffer);
+			break;
+		} case ID_CLIENT_LIST: {
+			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
+			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+			bsIn.Read(rakString);
+			char* pName = new char[strlen(rakString.C_String())];
+			strcpy(pName, rakString.C_String());
+			m_clients.push_front(pName);
+			m_clients.pop_back();
+			break;
+		} case ID_CLIENT_LIST_WIPE: {
+			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
+			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+			bsIn.Read(rakString);
+			m_clients.clear();
+			m_clients.resize(MAX_CLIENTS, "");
 			break;
 		}
 		}
@@ -132,15 +151,23 @@ void NetworkManager::UpdateServer() {
 
 			char* pName = new char[strlen(rakString.C_String())];
 			strcpy(pName, rakString.C_String());
-			m_clients.push_back(pName);
+			m_clients.push_front(pName);
+			m_clients.pop_back();
 			ImGui::LogCustomConsole(buffer);
-
-			sprintf(outBuffer, "%s\n", rakString.C_String());
-			
-			bsOut.Write((RakNet::MessageID)ID_CLIENT_CONNECT);
-			bsOut.Write(rakString);
-
+			std::list<char*>::const_iterator pos;
+			bsOut.Write((RakNet::MessageID)ID_CLIENT_LIST_WIPE);
 			m_peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
+			for (pos = m_clients.begin(); pos != m_clients.end(); pos++) {
+				if (*pos != "") {
+					sprintf(outBuffer, "%s\n", *pos);
+
+					bsOut.Write((RakNet::MessageID)ID_CLIENT_LIST);
+					bsOut.Write(outBuffer);
+					m_peer->Send(&bsOut, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
+				}
+			}
+
+			
 			break;
 		} case ID_CLIENT_TURN:{
 			//RakNet::BitStream bsIn(packet->data, packet->length, false);

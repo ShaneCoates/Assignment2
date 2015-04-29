@@ -92,17 +92,13 @@ void TestState::Draw() {
 		bool drawList = false;
 		const char* listbox_items[MAX_CLIENTS];
 		static int listbox_item_current = 0;
-		//if (m_networkClient->IsInitialized()) {
-		//	for (int i = 0; i < MAX_CLIENTS; ++i) {
-		//		listbox_items[i] = m_networkClient->m_clients[i];
-		//		drawList = true;
-		//	}
-		//} else if (m_networkServer->IsInitialized()) {
-		//	for (int i = 0; i < MAX_CLIENTS; ++i) {
-		//		listbox_items[i] = m_networkServer->m_clients[i];
-		//		drawList = true;
-		//	}
-		//}
+		if (m_networkClient->IsInitialized() && m_networkClient->m_clients.size() > 0) {
+			std::copy(m_networkClient->m_clients.begin(), m_networkClient->m_clients.end(), listbox_items);
+			drawList = true;
+		} else if (m_networkServer->IsInitialized() && m_networkServer->m_clients.size() > 0) {
+			std::copy(m_networkServer->m_clients.begin(), m_networkServer->m_clients.end(), listbox_items);
+			drawList = true;
+		}
 		if (drawList) {
 			ImGui::ListBox("Clients", &listbox_item_current, listbox_items, IM_ARRAYSIZE(listbox_items), 4);
 		}
