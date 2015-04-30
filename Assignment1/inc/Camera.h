@@ -48,6 +48,7 @@ public:
 
 	void GetFrustumPlanes(glm::vec4* _planes);
 
+	glm::vec3 PickAgainstPlane(float x, float y, const glm::vec4& _plane);
 protected:
 
 	glm::mat4 m_worldTransform;

@@ -85,7 +85,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\BoardTile.cpp" />
     <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\CheckerBoard.cpp" />
     <ClCompile Include="src\FlyCamera.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\GameStateManager.cpp" />
@@ -107,7 +109,9 @@
     <ClCompile Include="src\TestState.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="inc\BoardTile.h" />
     <ClInclude Include="inc\Camera.h" />
+    <ClInclude Include="inc\CheckerBoard.h" />
     <ClInclude Include="inc\FlyCamera.h" />
     <ClInclude Include="inc\Game.h" />
     <ClInclude Include="inc\GameStateManager.h" />

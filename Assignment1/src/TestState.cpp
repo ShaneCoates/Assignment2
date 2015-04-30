@@ -5,6 +5,9 @@
 #include "RakPeerInterface.h"
 #include "NetworkManager.h"
 #include "imgui.h"
+#include "aieutilities\Gizmos.h"
+#include "CheckerBoard.h"
+#include "Skybox.h"
 #define IM_ARRAYSIZE(_ARR)          ((int)(sizeof(_ARR)/sizeof(*_ARR)))
 
 void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
@@ -13,7 +16,7 @@ void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 	m_camera = new FlyCamera(10.0f);
 	m_camera->SetInputWindow(m_window);
 	m_camera->SetPerspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
-	m_camera->SetLookAt(glm::vec3(100, 20, 100), glm::vec3(0), glm::vec3(0, 1, 0));
+	m_camera->SetLookAt(glm::vec3(4, 10, 14), glm::vec3(4, 0, 4), glm::vec3(0, 1, 0));
 
 	m_networkServer = new NetworkManager();
 	m_networkClient = new NetworkManager();
@@ -22,8 +25,11 @@ void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 	m_serverIP = DEFAULT_IP;
 	m_serverPort = DEFAULT_PORT;
 
-	glfwSetWindowCloseCallback(m_window, *WindowClose(m_window));
+	m_checkerBoard = new CheckerBoard();
+	m_checkerBoard->SetCamera(m_camera);
+	m_skybox = new Skybox();
 
+	Gizmos::create();
 }
 
 TestState::~TestState() {
@@ -32,10 +38,11 @@ TestState::~TestState() {
 	m_networkServer->TerminateConnection();
 	delete m_networkClient;
 	delete m_networkServer;
+	Gizmos::destroy();
 }
 
 void TestState::Update(double _dt) {
-	m_camera->Update(_dt);
+	//m_camera->Update(_dt);
 
 	if (m_networkClient->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
@@ -55,13 +62,19 @@ void TestState::Update(double _dt) {
 		else if (m_networkServer->IsInitialized())
 			m_networkServer->Send("C5");
 	}
-
-	if (glfwGetKey(m_window, GLFW_KEY_ESCAPE) == GLFW_PRESS)  {
-		WindowClose(m_window);
-	}
+	m_checkerBoard->Update(_dt);
 }
 void TestState::Draw() {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	Gizmos::clear();
+
+	glEnable(GL_DEPTH_TEST);
+	
+	m_checkerBoard->Draw();
+	DrawGUI();
+}
+
+void TestState::DrawGUI() {
 	if (ImGui::CollapsingHeader("Network Options")) {
 		ImGui::InputText("Player Name", (char*)m_clientName.c_str(), 256);
 		ImGui::InputText("Server IP", (char*)m_serverIP.c_str(), 64);
@@ -97,10 +110,4 @@ void TestState::Draw() {
 	}
 
 	ImGui::ShowCustomConsole();
-}
-
-GLFWwindowclosefun TestState::WindowClose(GLFWwindow* window) {
-	m_networkClient->TerminateConnection();
-	m_networkServer->TerminateConnection();
-	return NULL;
 }

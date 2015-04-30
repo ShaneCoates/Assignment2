@@ -13,6 +13,8 @@
 struct GLFWwindow;
 class FlyCamera;
 class NetworkManager;
+class CheckerBoard;
+class Skybox;
 class TestState : public IGameState
 {
 public:
@@ -33,6 +35,8 @@ public:
 
 private:
 
+	void DrawGUI();
+
 	GLFWwindow* m_window;
 	GameStateManager* m_gameStateManager;
 
@@ -46,7 +50,8 @@ private:
 
 	bool m_serverRunning;
 
-	GLFWwindowclosefun WindowClose(GLFWwindow* window);
+	CheckerBoard* m_checkerBoard;
+	Skybox* m_skybox;
 
 };
 

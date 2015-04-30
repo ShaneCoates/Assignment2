@@ -1,6 +1,6 @@
 #include "Camera.h"
 #include <gl_core_4_4.h>
-
+#include <GLFW\glfw3.h>
 Camera::Camera() {
 	m_worldTransform = glm::mat4(1);
 	UpdateProjectionViewTransform();
@@ -88,3 +88,26 @@ void Camera::GetFrustumPlanes(glm::vec4* _planes) {
 		_planes[i] = glm::normalize(_planes[i]);
 	}
 }
+
+glm::vec3 Camera::PickAgainstPlane(float x, float y, const glm::vec4& _plane) {
+	int width = 0;
+	int height = 0;
+	glfwGetWindowSize(glfwGetCurrentContext(), &width, &height);
+
+	glm::vec3 screenPos(x / width * 2 - 1, (y / height * 2 - 1) * -1, -1);
+
+	screenPos.x /= m_projectionTransform[0][0];
+	screenPos.y /= m_projectionTransform[1][1];
+
+	glm::vec3 dir = glm::normalize(m_worldTransform * glm::vec4(screenPos, 0)).xyz();
+
+	float d = (_plane.w - glm::dot(m_worldTransform[3].xyz(), _plane.xyz()) / glm::dot(dir, _plane.xyz()));
+
+	if (d >= 0) {
+		return m_worldTransform[3].xyz() + dir * d;
+	} else {
+		return glm::vec3(0);
+	}
+
+}
+
