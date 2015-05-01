@@ -27,10 +27,10 @@ void BoardTile::Draw(Camera* _camera) {
 	}
 
 	if (m_type == eBlackPiece) {
-		Gizmos::addRing(glm::vec3(m_position.x, 0.101f, m_position.y), 0.2f, 0.45f, 50, glm::vec4(0, 0, 0, 1));
+		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.45f, 0.1f, 20, glm::vec4(0, 0, 0, 1));
 	}
 	else if (m_type == eRedPiece) {
-		Gizmos::addRing(glm::vec3(m_position.x, 0.101f, m_position.y), 0.2f, 0.45f, 50, glm::vec4(1, 0, 0, 1));
+		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.45f, 0.1f, 20, glm::vec4(1, 0, 0, 1));
 	}
 
 	Gizmos::addAABBFilled(glm::vec3(m_position.x, 0, m_position.y), glm::vec3(0.5f, 0.1f, 0.5f), m_colour);

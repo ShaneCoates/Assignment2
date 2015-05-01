@@ -59,12 +59,11 @@ void Procedural::Update(double _dt) {
 		ImGui::BeginChild("Sub2", ImVec2(0, 300), true);
 		ImGui::Text("Recent Seeds");
 		ImGui::Columns(3);
-		for (int i = 0; i < m_seeds.size(); i++)
+		for (unsigned int i = 0; i < m_seeds.size(); i++)
 		{
 			if (i == 5) {
 				ImGui::NextColumn();
 			}
-			char buf[32];
 			std::stringstream temp_str;
 			temp_str << (m_seeds[i]);
 			std::string str = temp_str.str();

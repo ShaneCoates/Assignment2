@@ -38,7 +38,7 @@ void Terrain::Draw(Camera* _camera) {
 	loc = glGetUniformLocation(m_program, "CameraPos");
 	glUniform3fv(loc, 1, glm::value_ptr(_camera->GetPosition()));
 	loc = glGetUniformLocation(m_program, "LightDir");
-	glUniform3fv(loc, 1, glm::value_ptr(glm::normalize(glm::vec3(cosf(glfwGetTime()), m_lightHeight, sinf(glfwGetTime())))));
+	glUniform3fv(loc, 1, glm::value_ptr(glm::normalize(glm::vec3(cosf((float)glfwGetTime()), m_lightHeight, sinf((float)glfwGetTime())))));
 
 	loc = glGetUniformLocation(m_program, "perlinTexture");
 	glUniform1i(loc, 0);

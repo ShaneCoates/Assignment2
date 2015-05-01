@@ -4,6 +4,7 @@
 #include <glm.hpp>
 class BoardTile;
 class Camera;
+class NetworkManager;
 class CheckerBoard {
 public:
 	CheckerBoard();
@@ -13,6 +14,8 @@ public:
 	void Draw();
 
 	void SetCamera(Camera* _camera);
+
+	void SetNetworkManager(NetworkManager* _manager) { m_networkManager = _manager; m_networkManagerInitialised = true; }
 protected:
 private:
 	
@@ -21,6 +24,9 @@ private:
 	BoardTile* m_tiles[8][8];
 	Camera* m_camera;
 	glm::vec2 m_selectedTile;
+	NetworkManager* m_networkManager;
+	bool m_networkManagerInitialised;
+	bool m_mouseDown;
 };
 
 #endif

@@ -10,6 +10,7 @@ NetworkManager::NetworkManager() {
 	m_clientCount = 0;
 	m_clients.resize(MAX_CLIENTS, "");
 	m_sendClientList = false;
+	m_hasMoved = false;
 }
 
 NetworkManager::~NetworkManager() {
@@ -38,6 +39,7 @@ void NetworkManager::InitializeClient(char* _clientName, unsigned int _port, cha
 }
 
 void NetworkManager::Update(double _dt) {
+	m_hasMoved = false;
 	if (m_initialized) {
 		if (m_isServer) {
 			UpdateServer();
@@ -45,9 +47,7 @@ void NetworkManager::Update(double _dt) {
 			UpdateClient();
 		}
 	}
-	if (m_sendClientList) {
 
-	}
 }
 
 void NetworkManager::UpdateClient() {
@@ -103,6 +103,14 @@ void NetworkManager::UpdateClient() {
 			rakString.Clear();
 			m_clients.clear();
 			m_clients.resize(MAX_CLIENTS, "");
+			break;
+		} case ID_CLIENT_TURN: {
+			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
+
+			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+			bsIn.Read(m_moveFrom);
+			bsIn.Read(m_moveTo);
+			m_hasMoved = true;
 			break;
 		}
 		}
@@ -175,9 +183,19 @@ void NetworkManager::UpdateServer() {
 			
 			break;
 		} case ID_CLIENT_TURN:{
-			//RakNet::BitStream bsIn(packet->data, packet->length, false);
-			//bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-			//bsIn.Read(rs);
+			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
+			m_peer->Send(&bsIn, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
+
+			glm::vec2 inFrom;
+			glm::vec2 inTo;
+
+			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+			bsIn.Read(inFrom);
+			bsIn.Read(inTo);
+
+			char buffer[256];
+			sprintf(buffer, "[%f][%f], [%f][%f]\n", inFrom.x, inFrom.y, inTo.x, inTo.y);
+			ImGui::LogCustomConsole(buffer);
 
 			//printf("X = %f, Y = %f\n", rs.x, rs.y);
 
@@ -246,4 +264,38 @@ void NetworkManager::Send(char* _message) {
 	}
 	bs.Write(buffer);
 	m_peer->Send(&bs, HIGH_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+}
+
+void NetworkManager::SendMove(glm::vec2 _from, glm::vec2 _to) {
+	if (!m_initialized || m_isServer) return;
+
+	BitStream bs;
+	bs.Write((RakNet::MessageID)ID_CLIENT_TURN);
+	//float fx, fy, tx, ty;
+	//fx = _from.x;
+	//fy = _from.y;
+	//tx = _to.x;
+	//ty = _to.y;
+	//bs.Write(fx);
+	//bs.Write(fy);
+	//
+	//bs.Write(tx);
+	//bs.Write(ty);
+
+
+	bs.Write(_from);
+	bs.Write(_to);
+
+
+
+
+	m_peer->Send(&bs, HIGH_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
+}
+
+bool NetworkManager::HasMoved(glm::vec2& _from, glm::vec2& _to) {
+	if (!m_hasMoved) return false;
+
+	_from = m_moveFrom;
+	_to = m_moveTo;
+	return true;
 }

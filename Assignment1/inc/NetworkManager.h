@@ -12,6 +12,7 @@
 #include <RakNetTypes.h>
 #include <list>
 #include <string>
+#include <glm.hpp>
 using namespace RakNet;
 class NetworkManager {
 public:
@@ -37,6 +38,9 @@ public:
 	void TerminateConnection();
 	
 	void Send(char* _message);
+	void SendMove(glm::vec2 _from, glm::vec2 _to);
+
+	bool HasMoved(glm::vec2& _from, glm::vec2& _to);
 
 	bool IsInitialized() { return m_initialized; }
 
@@ -52,6 +56,10 @@ private:
 	bool m_initialized;
 	bool m_isServer;
 	bool m_running;
+
+	bool m_hasMoved;
+	glm::vec2 m_moveFrom;
+	glm::vec2 m_moveTo;
 
 	RakPeerInterface* m_peer = RakPeerInterface::GetInstance();
 	Packet* m_packet;

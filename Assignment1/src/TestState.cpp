@@ -42,7 +42,7 @@ TestState::~TestState() {
 }
 
 void TestState::Update(double _dt) {
-	//m_camera->Update(_dt);
+	m_camera->Update(_dt);
 
 	if (m_networkClient->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
@@ -82,6 +82,7 @@ void TestState::DrawGUI() {
 		if (ImGui::Button("Start Server")) {
 			if (!m_networkServer->IsInitialized()) {
 				m_networkServer->InitializeServer(m_serverPort, (char*)m_serverIP.c_str());
+				m_checkerBoard->SetNetworkManager(m_networkServer);
 			}
 		}
 		ImGui::SameLine();
@@ -93,6 +94,7 @@ void TestState::DrawGUI() {
 				else {
 					m_networkClient->InitializeClient(DEFAULT_NAME, m_serverPort, (char*)m_serverIP.c_str());
 				}
+				m_checkerBoard->SetNetworkManager(m_networkClient);
 			}
 		}
 	}

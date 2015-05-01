@@ -96,6 +96,8 @@
     <ClCompile Include="src\imgui.cpp" />
     <ClCompile Include="src\imgui_impl_glfw_gl3.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Maze.cpp" />
+    <ClCompile Include="src\MazeState.cpp" />
     <ClCompile Include="src\NetworkManager.cpp" />
     <ClCompile Include="src\ObjectOBJ.cpp" />
     <ClCompile Include="src\ParticleEmitter.cpp" />
@@ -116,6 +118,8 @@
     <ClInclude Include="inc\Game.h" />
     <ClInclude Include="inc\GameStateManager.h" />
     <ClInclude Include="inc\gl_core_4_4.h" />
+    <ClInclude Include="inc\Maze.h" />
+    <ClInclude Include="inc\MazeState.h" />
     <ClInclude Include="inc\NetworkManager.h" />
     <ClInclude Include="inc\ObjectOBJ.h" />
     <ClInclude Include="inc\ParticleEmitter.h" />
