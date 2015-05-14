@@ -42,8 +42,8 @@ void CheckerBoard::Update(double _dt) {
 	glm::vec3 pos = m_camera->PickAgainstPlane(xpos, ypos, glm::vec4(0, 1, 0, 0));
 	if (glfwGetMouseButton(glfwGetCurrentContext(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
 		if (!m_mouseDown) {
+			
 			m_mouseDown = true;
-			bool success = false;
 			for (int x = 0; x < 8; x++) {
 				for (int z = 0; z < 8; z++) {
 					if (pos.x < x + 0.5f && pos.x > x - 0.5f &&
@@ -54,18 +54,13 @@ void CheckerBoard::Update(double _dt) {
 						else {
 							m_tiles[x][z]->Press(m_tiles);
 							m_selectedTile = glm::vec2(x, z);
-							success == true;
 						}
 					}
 				}
 			}
 		}
 		/*if (!success) {
-			for (int x = 0; x < 8; x++) {
-				for (int z = 0; z < 8; z++) {
-					m_tiles[x][z]->Deselect();
-				}
-			}
+			
 		}*/
 	}
 	else {
@@ -97,8 +92,11 @@ void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
 
 	m_tiles[(int)_to.x][(int)_to.y]->m_type = m_tiles[(int)_from.x][(int)_from.y]->m_type;
 	m_tiles[(int)_from.x][(int)_from.y]->m_type = eEmpty;
-	m_tiles[(int)_to.x][(int)_to.y]->Deselect();
-	m_tiles[(int)_from.x][(int)_from.y]->Deselect();
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			m_tiles[x][z]->Deselect();
+		}
+	}
 }
 
 void CheckerBoard::SetCamera(Camera* _camera) {

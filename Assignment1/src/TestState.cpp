@@ -69,8 +69,9 @@ void TestState::Draw() {
 	Gizmos::clear();
 
 	glEnable(GL_DEPTH_TEST);
-	
-	m_checkerBoard->Draw();
+	if (m_networkClient->IsInitialized()) {
+		m_checkerBoard->Draw();
+	}
 	DrawGUI();
 }
 

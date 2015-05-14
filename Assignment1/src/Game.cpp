@@ -44,7 +44,7 @@ Game::Game() {
 	m_gameStateManager = new GameStateManager();
 	m_gameStateManager->RegisterState("Maze", new MazeState(m_gameWindow, m_gameStateManager));
 	m_gameStateManager->RegisterState("Test", new TestState(m_gameWindow, m_gameStateManager));
-	m_gameStateManager->Push("Maze");
+	m_gameStateManager->Push("Test");
 }
 Game::~Game() {
 	delete m_gameStateManager;
