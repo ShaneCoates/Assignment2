@@ -18,6 +18,8 @@ public:
 	void SetNetworkManager(NetworkManager* _manager) { m_networkManager = _manager; m_networkManagerInitialised = true; }
 protected:
 private:
+
+	bool m_blackTurn;
 	
 	BoardTile* GetMouseOver();
 

@@ -21,6 +21,7 @@ CheckerBoard::CheckerBoard() {
 		isWhite = !isWhite;
 	}
 	m_networkManagerInitialised = false;
+	m_blackTurn = false;
 }
 CheckerBoard::~CheckerBoard() {
 
@@ -45,8 +46,11 @@ void CheckerBoard::Update(double _dt) {
 				m_networkManager->SendMove(m_selectedTile, glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y));
 			}
 			else if (mouseOver->m_type != eWhite) {
-				mouseOver->Press(m_tiles);
-				m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+				if (m_blackTurn && mouseOver->m_type == eBlackPiece ||
+					!m_blackTurn && mouseOver->m_type == eRedPiece) {
+					mouseOver->Press(m_tiles);
+					m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+				}
 			}
 		}
 		/*if (!success) {
@@ -104,6 +108,7 @@ void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
 			}
 		}
 	}
+	m_blackTurn = !m_blackTurn;
 }
 
 void CheckerBoard::SetCamera(Camera* _camera) {
