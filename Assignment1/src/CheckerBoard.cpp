@@ -26,8 +26,8 @@ CheckerBoard::~CheckerBoard() {
 
 }
 void CheckerBoard::Update(double _dt) {
-	glm::vec2 pFrom, pTo;
-	if (m_networkManagerInitialised) {
+	if (m_networkManagerInitialised) {	
+		glm::vec2 pFrom, pTo;
 		if (m_networkManager->HasMoved(pFrom, pTo)) {
 			Move(pFrom, pTo);
 		}
@@ -37,26 +37,16 @@ void CheckerBoard::Update(double _dt) {
 			m_tiles[x][z]->Update(_dt);
 		}
 	}
-	double xpos, ypos;
-	glfwGetCursorPos(glfwGetCurrentContext(), &xpos, &ypos);
-	glm::vec3 pos = m_camera->PickAgainstPlane(xpos, ypos, glm::vec4(0, 1, 0, 0));
+	BoardTile* mouseOver = GetMouseOver();
 	if (glfwGetMouseButton(glfwGetCurrentContext(), GLFW_MOUSE_BUTTON_1) == GLFW_PRESS) {
 		if (!m_mouseDown) {
-			
 			m_mouseDown = true;
-			for (int x = 0; x < 8; x++) {
-				for (int z = 0; z < 8; z++) {
-					if (pos.x < x + 0.5f && pos.x > x - 0.5f &&
-						pos.z < z + 0.5f && pos.z > z - 0.5f) {
-						if (m_tiles[x][z]->IsOpen()) {
-							m_networkManager->SendMove(m_selectedTile, glm::vec2(x, z));
-						}
-						else {
-							m_tiles[x][z]->Press(m_tiles);
-							m_selectedTile = glm::vec2(x, z);
-						}
-					}
-				}
+			if (mouseOver->IsOpen() && mouseOver->m_type == eEmpty) {
+				m_networkManager->SendMove(m_selectedTile, glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y));
+			}
+			else if (mouseOver->m_type != eWhite) {
+				mouseOver->Press(m_tiles);
+				m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
 			}
 		}
 		/*if (!success) {
@@ -65,14 +55,7 @@ void CheckerBoard::Update(double _dt) {
 	}
 	else {
 		m_mouseDown = false;
-		for (int x = 0; x < 8; x++) {
-			for (int z = 0; z < 8; z++) {
-				if (pos.x < x + 0.5f && pos.x > x - 0.5f &&
-					pos.z < z + 0.5f && pos.z > z - 0.5f) {
-					m_tiles[x][z]->Hover();
-				}
-			}
-		}
+		mouseOver->Hover();
 	}
 }
 void CheckerBoard::Draw() {
@@ -84,17 +67,41 @@ void CheckerBoard::Draw() {
 			m_tiles[x][z]->Draw(m_camera);
 		}
 	}
-
+	Gizmos::addAABBFilled(glm::vec3(3.5f, 0, 3.5f), glm::vec3(4.5f, 0.099f, 4.5f), glm::vec4(160.0f / 255.0f, 82.0f / 255.0f, 45.0f / 255.0f, 1.0f));
 	Gizmos::draw(m_camera->GetProjectionView());
+}
+
+BoardTile* CheckerBoard::GetMouseOver() {
+	double xpos, ypos;
+	glfwGetCursorPos(glfwGetCurrentContext(), &xpos, &ypos);
+	glm::vec3 pos = m_camera->PickAgainstPlane(xpos, ypos, glm::vec4(0, 1, 0, 0));
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			if (pos.x < x + 0.5f && pos.x > x - 0.5f &&
+				pos.z < z + 0.5f && pos.z > z - 0.5f) {
+				return m_tiles[x][z];
+			}
+		}
+	}
+	return new BoardTile;
 }
 
 void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
 
 	m_tiles[(int)_to.x][(int)_to.y]->m_type = m_tiles[(int)_from.x][(int)_from.y]->m_type;
 	m_tiles[(int)_from.x][(int)_from.y]->m_type = eEmpty;
+	if (abs((int)_to.x - (int)_from.x) == 2){
+		m_tiles[(int)((_from.x + _to.x) * 0.5f)][(int)((_from.y + _to.y) * 0.5f)]->m_type = eEmpty;
+	}
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
 			m_tiles[x][z]->Deselect();
+			if (m_tiles[x][z]->m_type == eBlackPiece && z == 0) {
+				m_tiles[x][z]->m_king = true;
+			}
+			if (m_tiles[x][z]->m_type == eRedPiece && z == 7) {
+				m_tiles[x][z]->m_king = true;
+			}
 		}
 	}
 }

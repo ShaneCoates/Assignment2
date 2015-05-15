@@ -19,6 +19,8 @@ public:
 protected:
 private:
 	
+	BoardTile* GetMouseOver();
+
 	void Move(glm::vec2 _from, glm::vec2 _to);
 
 	BoardTile* m_tiles[8][8];

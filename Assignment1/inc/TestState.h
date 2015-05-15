@@ -53,6 +53,8 @@ private:
 	CheckerBoard* m_checkerBoard;
 	Skybox* m_skybox;
 
+	float m_cameraAngle;
+
 };
 
 #endif
