@@ -21,18 +21,13 @@ CheckerBoard::CheckerBoard() {
 		isWhite = !isWhite;
 	}
 	m_networkManagerInitialised = false;
-	m_blackTurn = false;
+	m_blackTurn = true;
 }
 CheckerBoard::~CheckerBoard() {
 
 }
 void CheckerBoard::Update(double _dt) {
-	if (m_networkManagerInitialised) {	
-		glm::vec2 pFrom, pTo;
-		if (m_networkManager->HasMoved(pFrom, pTo)) {
-			Move(pFrom, pTo);
-		}
-	}
+	CheckForMoves();
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
 			m_tiles[x][z]->Update(_dt);
@@ -46,16 +41,21 @@ void CheckerBoard::Update(double _dt) {
 				m_networkManager->SendMove(m_selectedTile, glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y));
 			}
 			else if (mouseOver->m_type != eWhite) {
-				if (m_blackTurn && mouseOver->m_type == eBlackPiece ||
-					!m_blackTurn && mouseOver->m_type == eRedPiece) {
-					mouseOver->Press(m_tiles);
-					m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+				if (m_controllingBlack) {
+					if (m_blackTurn && mouseOver->m_type == eBlackPiece ) {
+						mouseOver->Press(m_tiles);
+						m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+					}
 				}
+				else {
+					if (!m_blackTurn && mouseOver->m_type == eRedPiece) {
+						mouseOver->Press(m_tiles);
+						m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+					}
+				}
+				
 			}
 		}
-		/*if (!success) {
-			
-		}*/
 	}
 	else {
 		m_mouseDown = false;
@@ -88,6 +88,15 @@ BoardTile* CheckerBoard::GetMouseOver() {
 		}
 	}
 	return new BoardTile;
+}
+
+void CheckerBoard::CheckForMoves() {
+	if (m_networkManagerInitialised) {
+		glm::vec2 pFrom, pTo;
+		if (m_networkManager->HasMoved(pFrom, pTo)) {
+			Move(pFrom, pTo);
+		}
+	}
 }
 
 void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {

@@ -11,6 +11,8 @@ NetworkManager::NetworkManager() {
 	m_clients.resize(MAX_CLIENTS, "");
 	m_sendClientList = false;
 	m_hasMoved = false;
+	m_allocatedBlackController = false;
+	m_allocatedRedController = false;
 }
 
 NetworkManager::~NetworkManager() {
@@ -112,6 +114,13 @@ void NetworkManager::UpdateClient() {
 			bsIn.Read(m_moveTo);
 			m_hasMoved = true;
 			break;
+		} case ID_ALLOCATE_SIDE: {
+			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
+
+			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
+			bsIn.Read(m_allocatedBlackController);
+			bsIn.Read(m_allocatedRedController);
+			break;
 		}
 		}
 	}
@@ -179,6 +188,18 @@ void NetworkManager::UpdateServer() {
 					m_peer->Send(&bsClientList, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
 				}
 			}
+			BitStream bsAllocateSide;
+			char allocateBuffer[256];
+			if (m_allocatedBlackController) {
+				m_allocatedRedController = true;
+			}
+			else {
+				m_allocatedBlackController = true;
+			}
+			bsAllocateSide.Write((RakNet::MessageID)ID_ALLOCATE_SIDE);
+			bsAllocateSide.Write(m_allocatedBlackController);
+			bsAllocateSide.Write(m_allocatedRedController);
+			m_peer->Send(&bsAllocateSide, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
 
 			
 			break;
@@ -196,6 +217,7 @@ void NetworkManager::UpdateServer() {
 			char buffer[256];
 			sprintf(buffer, "[%f][%f], [%f][%f]\n", inFrom.x, inFrom.y, inTo.x, inTo.y);
 			ImGui::LogCustomConsole(buffer);
+			m_hasMoved = true;
 
 			//printf("X = %f, Y = %f\n", rs.x, rs.y);
 

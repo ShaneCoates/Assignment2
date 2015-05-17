@@ -27,8 +27,10 @@ void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 
 	m_checkerBoard = new CheckerBoard();
 	m_checkerBoard->SetCamera(m_camera);
-	m_skybox = new Skybox();
+	//m_skybox = new Skybox();
 
+	m_allocatedSide = false;
+	m_networkSleepTimer = 0;
 	Gizmos::create();
 }
 
@@ -44,14 +46,26 @@ TestState::~TestState() {
 void TestState::Update(double _dt) {
 	m_camera->Update(_dt);
 	if (!m_networkClient->IsInitialized()) {
-		if (m_cameraAngle <= 3.14) {
-			m_cameraAngle += _dt * 0.5f;
-		}
+		m_cameraAngle += _dt * 0.5f;
 		m_camera->SetLookAt(glm::vec3((10 * sinf(m_cameraAngle)) + 3.5f, 6, (10 * cosf(m_cameraAngle)) + 3.5f), glm::vec3(3.5f, -2, 3.5f), glm::vec3(0, 1, 0));
 	}
 	if (m_networkClient->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
 			m_networkClient->Send(ImGui::GetConsoleBuffer());
+		}
+		if (m_networkSleepTimer <= 0.0f) {
+			if (!m_allocatedSide) {
+				if (m_networkClient->m_allocatedBlackController && m_networkClient->m_allocatedRedController) {
+					m_checkerBoard->m_controllingBlack = false;
+				}
+				else {
+					m_checkerBoard->m_controllingBlack = true;
+				}
+				m_allocatedSide = true;
+			}
+		}
+		else {
+			m_networkSleepTimer -= _dt;
 		}
 		m_networkClient->Update(_dt);
 		m_checkerBoard->Update(_dt);
@@ -61,6 +75,7 @@ void TestState::Update(double _dt) {
 			m_networkServer->Send(ImGui::GetConsoleBuffer());
 		}
 		m_networkServer->Update(_dt);
+		m_checkerBoard->CheckForMoves();
 	}
 }
 void TestState::Draw() {
@@ -94,6 +109,7 @@ void TestState::DrawGUI() {
 					m_networkClient->InitializeClient(DEFAULT_NAME, m_serverPort, (char*)m_serverIP.c_str());
 				}
 				m_checkerBoard->SetNetworkManager(m_networkClient);
+				m_networkSleepTimer = 1.0f;
 			}
 		}
 	}

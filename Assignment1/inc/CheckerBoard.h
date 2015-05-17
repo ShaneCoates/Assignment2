@@ -15,12 +15,15 @@ public:
 
 	void SetCamera(Camera* _camera);
 
+	void CheckForMoves();
+
 	void SetNetworkManager(NetworkManager* _manager) { m_networkManager = _manager; m_networkManagerInitialised = true; }
+	bool m_controllingBlack;
+
 protected:
 private:
 
 	bool m_blackTurn;
-	
 	BoardTile* GetMouseOver();
 
 	void Move(glm::vec2 _from, glm::vec2 _to);
@@ -31,6 +34,7 @@ private:
 	NetworkManager* m_networkManager;
 	bool m_networkManagerInitialised;
 	bool m_mouseDown;
+	
 };
 
 #endif

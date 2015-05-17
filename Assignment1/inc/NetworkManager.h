@@ -4,7 +4,7 @@
 #define	DEFAULT_PORT 3180
 #define	DEFAULT_IP "127.0.0.1"
 #define DEFAULT_NAME "Player"
-#define MAX_CLIENTS 16
+#define MAX_CLIENTS 2
 
 #include <RakPeerInterface.h>
 #include <MessageIdentifiers.h>
@@ -24,7 +24,8 @@ public:
 		ID_SERVER_END = ID_USER_PACKET_ENUM + 5,
 		ID_CLIENT_END = ID_USER_PACKET_ENUM + 6,
 		ID_CLIENT_LIST = ID_USER_PACKET_ENUM + 7,
-		ID_CLIENT_LIST_WIPE = ID_USER_PACKET_ENUM + 8
+		ID_CLIENT_LIST_WIPE = ID_USER_PACKET_ENUM + 8,
+		ID_ALLOCATE_SIDE = ID_USER_PACKET_ENUM + 9
 	}
 	;
 	NetworkManager();
@@ -47,6 +48,9 @@ public:
 	char* m_clientName;
 
 	std::list<char*> m_clients;
+
+	bool m_allocatedBlackController;
+	bool m_allocatedRedController;
 protected:
 private:
 	
@@ -72,6 +76,8 @@ private:
 	unsigned int m_clientCount;
 
 	bool m_sendClientList;
+
+
 };
 
 #endif

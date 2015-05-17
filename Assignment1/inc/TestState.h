@@ -54,7 +54,8 @@ private:
 	Skybox* m_skybox;
 
 	float m_cameraAngle;
-
+	bool m_allocatedSide;
+	float m_networkSleepTimer;
 };
 
 #endif
