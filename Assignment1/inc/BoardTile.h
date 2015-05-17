@@ -28,6 +28,7 @@ public:
 
 	TileType m_type;
 	glm::vec2 m_position;
+	bool m_king;
 protected:
 private:
 	glm::vec4 m_colour;

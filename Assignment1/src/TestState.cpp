@@ -17,7 +17,7 @@ void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 	m_camera->SetInputWindow(m_window);
 	m_camera->SetPerspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
 	m_camera->SetLookAt(glm::vec3(4, 10, 14), glm::vec3(4, 0, 4), glm::vec3(0, 1, 0));
-
+	m_cameraAngle = 0;
 	m_networkServer = new NetworkManager();
 	m_networkClient = new NetworkManager();
 
@@ -43,34 +43,33 @@ TestState::~TestState() {
 
 void TestState::Update(double _dt) {
 	m_camera->Update(_dt);
-
+	if (!m_networkClient->IsInitialized()) {
+		if (m_cameraAngle <= 3.14) {
+			m_cameraAngle += _dt * 0.5f;
+		}
+		m_camera->SetLookAt(glm::vec3((10 * sinf(m_cameraAngle)) + 3.5f, 6, (10 * cosf(m_cameraAngle)) + 3.5f), glm::vec3(3.5f, -2, 3.5f), glm::vec3(0, 1, 0));
+	}
 	if (m_networkClient->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
 			m_networkClient->Send(ImGui::GetConsoleBuffer());
 		}
 		m_networkClient->Update(_dt);
+		m_checkerBoard->Update(_dt);
+
 	} else if (m_networkServer->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
 			m_networkServer->Send(ImGui::GetConsoleBuffer());
 		}
 		m_networkServer->Update(_dt);
 	}
-	
-	if (glfwGetKey(m_window, GLFW_KEY_P) == GLFW_PRESS)  {
-		if (m_networkClient->IsInitialized())
-			m_networkClient->Send("C4");
-		else if (m_networkServer->IsInitialized())
-			m_networkServer->Send("C5");
-	}
-	m_checkerBoard->Update(_dt);
 }
 void TestState::Draw() {
-	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+	glClearColor(0, 0, 0, 1);
 	Gizmos::clear();
 
 	glEnable(GL_DEPTH_TEST);
-	
 	m_checkerBoard->Draw();
+	
 	DrawGUI();
 }
 

@@ -18,7 +18,11 @@ public:
 	void SetNetworkManager(NetworkManager* _manager) { m_networkManager = _manager; m_networkManagerInitialised = true; }
 protected:
 private:
+
+	bool m_blackTurn;
 	
+	BoardTile* GetMouseOver();
+
 	void Move(glm::vec2 _from, glm::vec2 _to);
 
 	BoardTile* m_tiles[8][8];

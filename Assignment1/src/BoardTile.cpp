@@ -8,29 +8,37 @@ BoardTile::BoardTile(glm::vec2 _position) {
 	m_position = _position;
 	m_selected = false;
 	m_open = false;
+	m_king = false;
 }
 BoardTile::~BoardTile() {
 
 }
 void BoardTile::Update(double _dt) {
+
+}
+void BoardTile::Draw(Camera* _camera) {
 	m_colour = glm::vec4(0.3f, 0.3f, 0.3f, 1);
 	if (m_type == eWhite) {
 		m_colour = glm::vec4(1);
 	}
-}
-void BoardTile::Draw(Camera* _camera) {
 	if (m_selected) {
 		m_colour = glm::vec4(0.5f, 0.5f, 1, 1);
 	}
 	if (m_open) {
 		m_colour = glm::vec4(0.5f, 1, 0.5f, 1);
 	}
-
-	if (m_type == eBlackPiece) {
-		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.45f, 0.1f, 20, glm::vec4(0, 0, 0, 1));
-	}
-	else if (m_type == eRedPiece) {
-		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.45f, 0.1f, 20, glm::vec4(1, 0, 0, 1));
+	if (m_type == eBlackPiece || m_type == eRedPiece) {
+		glm::vec4 pieceColour;
+		if (m_type == eBlackPiece) {
+			pieceColour = glm::vec4(0, 0, 0, 1);
+		}
+		else if (m_type == eRedPiece) {
+			pieceColour = glm::vec4(1, 0, 0, 1);
+		}
+		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.4f, 0.05f, 20, pieceColour);
+		if (m_king) {
+			Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.31f, m_position.y), 0.4f, 0.05f, 20, pieceColour);
+		}
 	}
 
 	Gizmos::addAABBFilled(glm::vec3(m_position.x, 0, m_position.y), glm::vec3(0.5f, 0.1f, 0.5f), m_colour);
