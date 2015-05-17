@@ -9,7 +9,7 @@ void MazeState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 	m_camera = new FlyCamera(10.0f);
 	m_camera->SetInputWindow(m_window);
 	m_camera->SetPerspective(glm::pi<float>() * 0.25f, 16.0f / 9.0f, 0.1f, 1000.0f);
-	m_camera->SetLookAt(glm::vec3(80, 50, 80), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	m_camera->SetLookAt(glm::vec3(8, 5, 8), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
 
 	m_maze = new Maze();
 
@@ -39,6 +39,7 @@ void MazeState::Draw() {
 void MazeState::DrawGUI() {
 	if (ImGui::CollapsingHeader("Maze Generation")) {
 		if (ImGui::TreeNode("General")) {
+			ImGui::Checkbox("Wireframe", &m_maze->m_wireFrame);
 			if (ImGui::Button("Stop")) {
 				m_maze->Stop();
 			}
