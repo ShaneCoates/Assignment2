@@ -47,6 +47,11 @@ void BoardTile::Hover() {
 	m_colour = glm::vec4(0, 0.7f, 0.7f, 1);
 }
 void BoardTile::Press(BoardTile* _tiles[8][8]) {
+	for (int x = 0; x < 8; x++) {
+		for (int y = 0; y < 8; y++) {
+			_tiles[x][y]->Deselect();
+		}
+	}
 	m_selected = true;
 	if (m_position.x > 0) {
 		if (m_type == eBlackPiece && m_position.y > 0) {

@@ -293,24 +293,10 @@ void NetworkManager::SendMove(glm::vec2 _from, glm::vec2 _to) {
 
 	BitStream bs;
 	bs.Write((RakNet::MessageID)ID_CLIENT_TURN);
-	//float fx, fy, tx, ty;
-	//fx = _from.x;
-	//fy = _from.y;
-	//tx = _to.x;
-	//ty = _to.y;
-	//bs.Write(fx);
-	//bs.Write(fy);
-	//
-	//bs.Write(tx);
-	//bs.Write(ty);
-
-
+	
 	bs.Write(_from);
 	bs.Write(_to);
-
-
-
-
+	
 	m_peer->Send(&bs, HIGH_PRIORITY, RELIABLE, 0, UNASSIGNED_RAKNET_GUID, true);
 }
 

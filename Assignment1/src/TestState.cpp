@@ -44,11 +44,8 @@ TestState::~TestState() {
 }
 
 void TestState::Update(double _dt) {
-	m_camera->Update(_dt);
-	if (!m_networkClient->IsInitialized()) {
-		m_cameraAngle += _dt * 0.5f;
-		m_camera->SetLookAt(glm::vec3((10 * sinf(m_cameraAngle)) + 3.5f, 6, (10 * cosf(m_cameraAngle)) + 3.5f), glm::vec3(3.5f, -2, 3.5f), glm::vec3(0, 1, 0));
-	}
+	UpdateCamera(_dt);
+	
 	if (m_networkClient->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
 			m_networkClient->Send(ImGui::GetConsoleBuffer());
@@ -127,4 +124,37 @@ void TestState::DrawGUI() {
 	}
 
 	ImGui::ShowCustomConsole();
+}
+
+void TestState::UpdateCamera(float _dt) {
+	if (!m_networkClient->IsInitialized() || !m_allocatedSide) {
+		m_cameraAngle += _dt * 0.5f;
+	}
+	else {
+		if (m_allocatedSide) {
+			if (!m_checkerBoard->m_controllingBlack) {
+				if (m_cameraAngle < 3.14f) {
+					m_cameraAngle += _dt * 0.5f;
+				} else {
+					m_cameraAngle = 3.14f;
+				}
+			}
+			else if (m_checkerBoard->m_controllingBlack) {
+				if (m_cameraAngle >= 0.001f && m_cameraAngle <= 6.2399f) {
+					if (m_cameraAngle > 3.14f) {
+						m_cameraAngle += _dt * 0.5f;
+					}
+					else {
+						m_cameraAngle -= _dt * 0.5f;
+					}
+				}
+			}
+		}
+	}
+	if (m_cameraAngle >(2 * 3.14)) m_cameraAngle = 0;
+	if (m_cameraAngle < 0) m_cameraAngle = 2 * 3.14;
+
+	m_camera->SetLookAt(glm::vec3((10 * sinf(m_cameraAngle)) + 3.5f, 8, (10 * cosf(m_cameraAngle)) + 3.5f), glm::vec3(3.5f, -2, 3.5f), glm::vec3(0, 1, 0));
+	m_camera->Update(_dt);
+
 }

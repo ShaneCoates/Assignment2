@@ -36,7 +36,7 @@ public:
 private:
 
 	void DrawGUI();
-
+	void UpdateCamera(float _dt);
 	GLFWwindow* m_window;
 	GameStateManager* m_gameStateManager;
 
