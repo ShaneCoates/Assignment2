@@ -35,9 +35,9 @@ void BoardTile::Draw(Camera* _camera) {
 		else if (m_type == eRedPiece) {
 			pieceColour = glm::vec4(1, 0, 0, 1);
 		}
-		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.4f, 0.05f, 20, pieceColour);
+		Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.21f, m_position.y), 0.4f, 0.05f, 50, pieceColour);
 		if (m_king) {
-			Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.31f, m_position.y), 0.4f, 0.05f, 20, pieceColour);
+			Gizmos::addCylinderFilled(glm::vec3(m_position.x, 0.31f, m_position.y), 0.4f, 0.05f, 50, pieceColour);
 		}
 	}
 
@@ -54,12 +54,13 @@ void BoardTile::Press(BoardTile* _tiles[8][8]) {
 	}
 	m_selected = true;
 	if (m_position.x > 0) {
-		if (m_type == eBlackPiece && m_position.y > 0) {
+		if ((m_type == eBlackPiece || (m_type == eRedPiece && m_king)) && m_position.y > 0) {
 			BoardTile* pTile = _tiles[(int)m_position.x - 1][(int)m_position.y - 1];
 			if (pTile->m_type == eEmpty) {
 				pTile->Highlight();
 			}
-			if (pTile->m_type == eRedPiece) {
+			if ((pTile->m_type == eRedPiece && m_type == eBlackPiece) ||
+				(pTile->m_type == eBlackPiece && m_type == eRedPiece)) {
 				if (m_position.x > 1 && m_position.y > 1) {
 					BoardTile* pNextTile = _tiles[(int)m_position.x - 2][(int)m_position.y - 2];
 					if (pNextTile->m_type == eEmpty) {
@@ -68,12 +69,13 @@ void BoardTile::Press(BoardTile* _tiles[8][8]) {
 				}
 			}
 		}
-		else if (m_type == eRedPiece && m_position.y < 7) {
+		if ((m_type == eRedPiece || (m_type == eBlackPiece && m_king)) && m_position.y < 7) {
 			BoardTile* pTile = _tiles[(int)m_position.x - 1][(int)m_position.y + 1];
 			if (pTile->m_type == eEmpty) {
 				pTile->Highlight();
 			}
-			if (pTile->m_type == eBlackPiece) {
+			if ((pTile->m_type == eRedPiece && m_type == eBlackPiece) ||
+				(pTile->m_type == eBlackPiece && m_type == eRedPiece)) {
 				if (m_position.x > 1 && m_position.y < 6) {
 					BoardTile* pNextTile = _tiles[(int)m_position.x - 2][(int)m_position.y + 2];
 					if (pNextTile->m_type == eEmpty) {
@@ -84,12 +86,13 @@ void BoardTile::Press(BoardTile* _tiles[8][8]) {
 		}
 	}
 	if (m_position.x < 7) {
-		if (m_type == eBlackPiece && m_position.y > 0) {
+		if ((m_type == eBlackPiece || (m_type == eRedPiece && m_king)) && m_position.y > 0) {
 			BoardTile* pTile = _tiles[(int)m_position.x + 1][(int)m_position.y - 1];
 			if (pTile->m_type == eEmpty) {
 				pTile->Highlight();
 			}
-			if (pTile->m_type == eRedPiece) {
+			if ((pTile->m_type == eRedPiece && m_type == eBlackPiece) ||
+				(pTile->m_type == eBlackPiece && m_type == eRedPiece)) {
 				if (m_position.x < 6 && m_position.y > 1) {
 					BoardTile* pNextTile = _tiles[(int)m_position.x + 2][(int)m_position.y - 2];
 					if (pNextTile->m_type == eEmpty) {
@@ -98,12 +101,13 @@ void BoardTile::Press(BoardTile* _tiles[8][8]) {
 				}
 			}
 		}
-		else if (m_type == eRedPiece && m_position.y < 7) {
+		if ((m_type == eRedPiece || (m_type == eBlackPiece && m_king)) && m_position.y < 7) {
 			BoardTile* pTile = _tiles[(int)m_position.x + 1][(int)m_position.y + 1];
 			if (pTile->m_type == eEmpty) {
 				pTile->Highlight();
 			}
-			if (pTile->m_type == eBlackPiece) {
+			if ((pTile->m_type == eRedPiece && m_type == eBlackPiece) ||
+				(pTile->m_type == eBlackPiece && m_type == eRedPiece)) {
 				if (m_position.x < 6 && m_position.y < 6) {
 					BoardTile* pNextTile = _tiles[(int)m_position.x + 2][(int)m_position.y + 2];
 					if (pNextTile->m_type == eEmpty) {

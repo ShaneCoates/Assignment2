@@ -23,6 +23,8 @@ public:
 protected:
 private:
 
+	void GameOver();
+
 	bool m_blackTurn;
 	BoardTile* GetMouseOver();
 

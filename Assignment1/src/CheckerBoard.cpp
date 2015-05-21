@@ -5,23 +5,8 @@
 #include "BoardTile.h"
 #include "NetworkManager.h"
 CheckerBoard::CheckerBoard() {
-	bool isWhite = false;
-	for (int x = 0; x < 8; x++) {
-		for (int z = 0; z < 8; z++) {
-			m_tiles[x][z] = new BoardTile(glm::vec2(x, z));
-			m_tiles[x][z]->m_type= (isWhite) ? eWhite : eEmpty;
-			if (z < 3 && m_tiles[x][z]->m_type == eEmpty) {
-				m_tiles[x][z]->m_type = eRedPiece;
-			}
-			else if (z > 4 && m_tiles[x][z]->m_type == eEmpty) {
-				m_tiles[x][z]->m_type = eBlackPiece;
-			}
-			isWhite = !isWhite;
-		}
-		isWhite = !isWhite;
-	}
 	m_networkManagerInitialised = false;
-	m_blackTurn = true;
+	GameOver();
 }
 CheckerBoard::~CheckerBoard() {
 
@@ -78,7 +63,7 @@ void CheckerBoard::Draw() {
 BoardTile* CheckerBoard::GetMouseOver() {
 	double xpos, ypos;
 	glfwGetCursorPos(glfwGetCurrentContext(), &xpos, &ypos);
-	glm::vec3 pos = m_camera->PickAgainstPlane(xpos, ypos, glm::vec4(0, 1, 0, 0));
+	glm::vec3 pos = m_camera->PickAgainstPlane((float)xpos, (float)ypos, glm::vec4(0, 1, 0, 0));
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
 			if (pos.x < x + 0.5f && pos.x > x - 0.5f &&
@@ -102,22 +87,56 @@ void CheckerBoard::CheckForMoves() {
 void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
 
 	m_tiles[(int)_to.x][(int)_to.y]->m_type = m_tiles[(int)_from.x][(int)_from.y]->m_type;
+	m_tiles[(int)_to.x][(int)_to.y]->m_king = m_tiles[(int)_from.x][(int)_from.y]->m_king;
+
 	m_tiles[(int)_from.x][(int)_from.y]->m_type = eEmpty;
+	m_tiles[(int)_from.x][(int)_from.y]->m_king = false;
+
 	if (abs((int)_to.x - (int)_from.x) == 2){
 		m_tiles[(int)((_from.x + _to.x) * 0.5f)][(int)((_from.y + _to.y) * 0.5f)]->m_type = eEmpty;
 	}
+	bool blackFound, redFound = false;
+	
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
 			m_tiles[x][z]->Deselect();
-			if (m_tiles[x][z]->m_type == eBlackPiece && z == 0) {
-				m_tiles[x][z]->m_king = true;
+			if (m_tiles[x][z]->m_type == eBlackPiece) {
+				if (z == 0) {
+					m_tiles[x][z]->m_king = true;
+				}
+				blackFound = true;
 			}
-			if (m_tiles[x][z]->m_type == eRedPiece && z == 7) {
-				m_tiles[x][z]->m_king = true;
+			if (m_tiles[x][z]->m_type == eRedPiece) {
+				if (z == 7) {
+					m_tiles[x][z]->m_king = true;
+				}
+				redFound = true;
 			}
 		}
 	}
+	if (!redFound || !blackFound) {
+		GameOver();
+	}
 	m_blackTurn = !m_blackTurn;
+}
+
+void CheckerBoard::GameOver() {
+	bool isWhite = false;
+	for (int x = 0; x < 8; x++) {
+		for (int z = 0; z < 8; z++) {
+			m_tiles[x][z] = new BoardTile(glm::vec2(x, z));
+			m_tiles[x][z]->m_type = (isWhite) ? eWhite : eEmpty;
+			if (z < 3 && m_tiles[x][z]->m_type == eEmpty) {
+				m_tiles[x][z]->m_type = eRedPiece;
+			}
+			else if (z > 4 && m_tiles[x][z]->m_type == eEmpty) {
+				m_tiles[x][z]->m_type = eBlackPiece;
+			}
+			isWhite = !isWhite;
+		}
+		isWhite = !isWhite;
+	}
+	m_blackTurn = true;
 }
 
 void CheckerBoard::SetCamera(Camera* _camera) {

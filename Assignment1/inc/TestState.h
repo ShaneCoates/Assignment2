@@ -10,6 +10,8 @@
 #include <GLFW\glfw3.h>
 #include "GameStateManager.h"
 #include <string>
+#define _USE_MATH_DEFINES
+#include <math.h>
 struct GLFWwindow;
 class FlyCamera;
 class NetworkManager;
@@ -36,7 +38,7 @@ public:
 private:
 
 	void DrawGUI();
-	void UpdateCamera(float _dt);
+	void UpdateCamera(double _dt);
 	GLFWwindow* m_window;
 	GameStateManager* m_gameStateManager;
 
@@ -52,10 +54,12 @@ private:
 
 	CheckerBoard* m_checkerBoard;
 	Skybox* m_skybox;
-
-	float m_cameraAngle;
+	double m_targetCameraAngle;
+	const double m_redTargetCameraAngle = M_PI;
+	const double m_blackTargetCameraAngle = M_PI * 2;
+	double m_cameraAngle;
 	bool m_allocatedSide;
-	float m_networkSleepTimer;
+	double m_networkSleepTimer;
 };
 
 #endif

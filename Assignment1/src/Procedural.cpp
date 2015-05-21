@@ -39,7 +39,7 @@ void Procedural::Update(double _dt) {
 	if (ImGui::CollapsingHeader("Realtime Terrain")) {
 		ImGui::SliderFloat("Z-Value", &m_terrain->m_zValue, -100.0f, 100.0f);
 		ImGui::SliderFloat("Sea Level", &m_terrain->m_amplitude, 0, 2);
-		ImGui::SliderFloat ("Size", &m_terrain->m_size, 0.1, 3);
+		ImGui::SliderFloat ("Size", &m_terrain->m_size, 0.1f, 3);
 	}
 	if (ImGui::CollapsingHeader("Reload Terrain")) {
 		ImGui::SliderInt("Seed", &m_terrain->m_seed, 0, 100000);
@@ -84,6 +84,6 @@ void Procedural::Update(double _dt) {
 void Procedural::Draw() {
 	m_skybox->Draw(m_camera);
 	m_terrain->Draw(m_camera);
-	m_emitter->Draw(glfwGetTime(), m_camera);
+	m_emitter->Draw((float)glfwGetTime(), m_camera);
 	
 }

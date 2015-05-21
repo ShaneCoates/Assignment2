@@ -31,6 +31,7 @@ void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 
 	m_allocatedSide = false;
 	m_networkSleepTimer = 0;
+	m_targetCameraAngle = 7.0f;
 	Gizmos::create();
 }
 
@@ -44,8 +45,7 @@ TestState::~TestState() {
 }
 
 void TestState::Update(double _dt) {
-	UpdateCamera(_dt);
-	
+		
 	if (m_networkClient->IsInitialized()) {
 		if (ImGui::GetConsoleUpdated()) {
 			m_networkClient->Send(ImGui::GetConsoleBuffer());
@@ -74,6 +74,8 @@ void TestState::Update(double _dt) {
 		m_networkServer->Update(_dt);
 		m_checkerBoard->CheckForMoves();
 	}
+	UpdateCamera(_dt);
+
 }
 void TestState::Draw() {
 	glClearColor(0, 0, 0, 1);
@@ -126,35 +128,29 @@ void TestState::DrawGUI() {
 	ImGui::ShowCustomConsole();
 }
 
-void TestState::UpdateCamera(float _dt) {
+void TestState::UpdateCamera(double _dt) {
+	m_targetCameraAngle = (m_checkerBoard->m_controllingBlack ? m_blackTargetCameraAngle : m_redTargetCameraAngle);
 	if (!m_networkClient->IsInitialized() || !m_allocatedSide) {
 		m_cameraAngle += _dt * 0.5f;
 	}
 	else {
 		if (m_allocatedSide) {
-			if (!m_checkerBoard->m_controllingBlack) {
-				if (m_cameraAngle < 3.14f) {
-					m_cameraAngle += _dt * 0.5f;
-				} else {
-					m_cameraAngle = 3.14f;
+
+			if (abs(m_cameraAngle - m_targetCameraAngle) >= _dt) {
+				if (m_cameraAngle >= m_targetCameraAngle) {
+					m_cameraAngle -= _dt;
 				}
-			}
-			else if (m_checkerBoard->m_controllingBlack) {
-				if (m_cameraAngle >= 0.001f && m_cameraAngle <= 6.2399f) {
-					if (m_cameraAngle > 3.14f) {
-						m_cameraAngle += _dt * 0.5f;
-					}
-					else {
-						m_cameraAngle -= _dt * 0.5f;
-					}
+				else if (m_cameraAngle <= m_targetCameraAngle) {
+					m_cameraAngle += _dt;
 				}
 			}
 		}
 	}
+	
 	if (m_cameraAngle >(2 * 3.14)) m_cameraAngle = 0;
 	if (m_cameraAngle < 0) m_cameraAngle = 2 * 3.14;
-
-	m_camera->SetLookAt(glm::vec3((10 * sinf(m_cameraAngle)) + 3.5f, 8, (10 * cosf(m_cameraAngle)) + 3.5f), glm::vec3(3.5f, -2, 3.5f), glm::vec3(0, 1, 0));
-	m_camera->Update(_dt);
+	
+	m_camera->SetLookAt(glm::vec3((10 * sin(m_cameraAngle)) + 3.5f, 8, (10 * cos(m_cameraAngle)) + 3.5f), glm::vec3(3.5f, -2, 3.5f), glm::vec3(0, 1, 0));
+	//m_camera->Update(_dt);
 
 }

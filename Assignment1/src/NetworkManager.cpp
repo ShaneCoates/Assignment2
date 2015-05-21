@@ -189,7 +189,6 @@ void NetworkManager::UpdateServer() {
 				}
 			}
 			BitStream bsAllocateSide;
-			char allocateBuffer[256];
 			if (m_allocatedBlackController) {
 				m_allocatedRedController = true;
 			}
@@ -200,28 +199,21 @@ void NetworkManager::UpdateServer() {
 			bsAllocateSide.Write(m_allocatedBlackController);
 			bsAllocateSide.Write(m_allocatedRedController);
 			m_peer->Send(&bsAllocateSide, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
-
 			
 			break;
 		} case ID_CLIENT_TURN:{
 			RakNet::BitStream bsIn(m_packet->data, m_packet->length, false);
 			m_peer->Send(&bsIn, HIGH_PRIORITY, RELIABLE_ORDERED, 0, UNASSIGNED_RAKNET_GUID, true);
 
-			glm::vec2 inFrom;
-			glm::vec2 inTo;
-
 			bsIn.IgnoreBytes(sizeof(RakNet::MessageID));
-			bsIn.Read(inFrom);
-			bsIn.Read(inTo);
+			bsIn.Read(m_moveFrom);
+			bsIn.Read(m_moveTo);
 
 			char buffer[256];
-			sprintf(buffer, "[%f][%f], [%f][%f]\n", inFrom.x, inFrom.y, inTo.x, inTo.y);
+			sprintf(buffer, "[%f][%f], [%f][%f]\n", m_moveFrom.x, m_moveFrom.y, m_moveTo.x, m_moveTo.y);
 			ImGui::LogCustomConsole(buffer);
 			m_hasMoved = true;
-
-			//printf("X = %f, Y = %f\n", rs.x, rs.y);
-
-			//serverVector = rs;
+			
 			break;
 		} case ID_CLIENT_MESSAGE:{
 			RakNet::BitStream bs(m_packet->data, m_packet->length, false);

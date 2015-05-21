@@ -85,9 +85,9 @@ void Terrain::GenerateGrid(unsigned int _size) {
 	float const S = 1.0f / (float)(_size - 1);
 	for (unsigned int r = 0; r < _size; r++) {
 		for (unsigned int s = 0; s < _size; s++) {
-			float const y = sin(-M_PI_2 + M_PI * r * R);
-			float const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);
-			float const z = sin(2 * M_PI * s * S) * sin(M_PI * r * R);
+			double const y = sin(-M_PI_2 + M_PI * r * R);
+			double const x = cos(2 * M_PI * s * S) * sin(M_PI * r * R);
+			double const z = sin(2 * M_PI * s * S) * sin(M_PI * r * R);
 
 			vertices[r * _size + s].Position = glm::vec4(x * _size, y * _size, z * _size, 1);
 			vertices[r * _size + s].UV = glm::vec2(s*S, r*R);
@@ -149,7 +149,7 @@ void Terrain::GenerateGrid(unsigned int _size) {
 	//CreateTexture(_size);
 }
 void Terrain::CreateTexture(unsigned int _size) {
-	float octaves = m_octaves;
+	int octaves = m_octaves;
 	float *perlin_data = new float[_size * _size * _size];
 	float scale = (1.0f / _size) * 3;
 	for (unsigned int r = 0; r < _size; ++r) {

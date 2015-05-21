@@ -31,6 +31,7 @@ public:
 	bool m_king;
 protected:
 private:
+
 	glm::vec4 m_colour;
 	bool m_selected;
 	bool m_open;
