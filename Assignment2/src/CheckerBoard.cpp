@@ -12,6 +12,7 @@ CheckerBoard::~CheckerBoard() {
 
 }
 void CheckerBoard::Update(double _dt) {
+
 	CheckForMoves();
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
@@ -27,18 +28,55 @@ void CheckerBoard::Update(double _dt) {
 			}
 			else if (mouseOver->m_type != eWhite) {
 				if (m_controllingBlack) {
-					if (m_blackTurn && mouseOver->m_type == eBlackPiece ) {
-						mouseOver->Press(m_tiles);
-						m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+					if (m_blackTurn && mouseOver->m_type == eBlackPiece) {
+						DeselectAll();
+						if (m_availableTakes.size() > 0) {
+							bool found = false;
+							for (unsigned int i = 0; i < m_availableTakes.size(); i++) {
+								if (m_availableTakes[i].From == mouseOver->m_position){
+									mouseOver->Press(m_tiles);
+									m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+									found = true;
+								}
+							}
+							if (!found) {
+								for (unsigned int i = 0; i < m_availableTakes.size(); i++) {
+									m_tiles[(int)m_availableTakes[i].From.x][(int)m_availableTakes[i].From.y]->Flash();
+									m_tiles[(int)m_availableTakes[i].To.x][(int)m_availableTakes[i].To.y]->Flash();
+								}
+							}
+						}
+						else {
+							mouseOver->Press(m_tiles);
+							m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+						}
 					}
 				}
 				else {
 					if (!m_blackTurn && mouseOver->m_type == eRedPiece) {
-						mouseOver->Press(m_tiles);
-						m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+						DeselectAll();
+						if (m_availableTakes.size() > 0) {
+							bool found = false;
+							for (unsigned int i = 0; i < m_availableTakes.size(); i++) {
+								if (m_availableTakes[i].From == mouseOver->m_position){
+									mouseOver->Press(m_tiles);
+									m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+									found = true;
+								}
+							}
+							if (!found) {
+								for (unsigned int i = 0; i < m_availableTakes.size(); i++) {
+									m_tiles[(int)m_availableTakes[i].From.x][(int)m_availableTakes[i].From.y]->Flash();
+									m_tiles[(int)m_availableTakes[i].To.x][(int)m_availableTakes[i].To.y]->Flash();
+								}
+							}
+						}
+						else {
+							mouseOver->Press(m_tiles);
+							m_selectedTile = glm::vec2(mouseOver->m_position.x, mouseOver->m_position.y);
+						}
 					}
 				}
-				
 			}
 		}
 	}
@@ -85,7 +123,7 @@ void CheckerBoard::CheckForMoves() {
 }
 
 void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
-
+	bool wasTake = false;
 	m_tiles[(int)_to.x][(int)_to.y]->m_type = m_tiles[(int)_from.x][(int)_from.y]->m_type;
 	m_tiles[(int)_to.x][(int)_to.y]->m_king = m_tiles[(int)_from.x][(int)_from.y]->m_king;
 
@@ -94,9 +132,19 @@ void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
 
 	if (abs((int)_to.x - (int)_from.x) == 2){
 		m_tiles[(int)((_from.x + _to.x) * 0.5f)][(int)((_from.y + _to.y) * 0.5f)]->m_type = eEmpty;
+		wasTake = true;
 	}
+	CheckGameOver();
+	if (m_tiles[(int)_to.x][(int)_to.y]->CanTake(m_tiles) && wasTake) {
+		//do nothing 
+	} else {
+		m_blackTurn = !m_blackTurn;
+	}
+	CheckForTakeAvailable();
+}
+
+void CheckerBoard::CheckGameOver() {
 	bool blackFound, redFound = false;
-	
 	for (int x = 0; x < 8; x++) {
 		for (int z = 0; z < 8; z++) {
 			m_tiles[x][z]->Deselect();
@@ -117,9 +165,7 @@ void CheckerBoard::Move(glm::vec2 _from, glm::vec2 _to) {
 	if (!redFound || !blackFound) {
 		GameOver();
 	}
-	m_blackTurn = !m_blackTurn;
 }
-
 void CheckerBoard::GameOver() {
 	bool isWhite = false;
 	for (int x = 0; x < 8; x++) {
@@ -138,7 +184,109 @@ void CheckerBoard::GameOver() {
 	}
 	m_blackTurn = true;
 }
+void CheckerBoard::CheckForTakeAvailable() {
+	m_availableTakes.clear();
+	if (m_blackTurn) {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				BoardTile* currentTile = m_tiles[x][z];
+				PossibleMove move;
+				move.From = glm::vec2(x, z);
+				if (currentTile->m_type == eBlackPiece) {
+					if (z > 1) {
+						if (x < 6) {
+							if (m_tiles[x + 2][z - 2]->m_type == eEmpty &&
+								m_tiles[x + 1][z - 1]->m_type == eRedPiece) {
+								move.To = glm::vec2(x + 2, z - 2);
+								m_availableTakes.push_back(move);
+							}
+						}
+						if (x > 1) {
+							if (m_tiles[x - 2][z - 2]->m_type == eEmpty &&
+								m_tiles[x - 1][z - 1]->m_type == eRedPiece) {
+								move.To = glm::vec2(x - 2, z - 2);
+								m_availableTakes.push_back(move);
+							}
+						}
+					}
+				}
+				if (currentTile->m_king) {
+					if (z < 6) {
+						if (x < 6) {
+							if (m_tiles[x + 2][z + 2]->m_type == eEmpty &&
+								m_tiles[x + 1][z + 1]->m_type == eRedPiece) {
+								move.To = glm::vec2(x + 2, z + 2);
+								m_availableTakes.push_back(move);
+							}
+						}
+						if (x > 1) {
+							if (m_tiles[x - 2][z + 2]->m_type == eEmpty &&
+								m_tiles[x - 1][z + 1]->m_type == eRedPiece) {
+								move.To = glm::vec2(x - 2, z + 2);
+								m_availableTakes.push_back(move);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	else {
+		for (int x = 0; x < 8; x++) {
+			for (int z = 0; z < 8; z++) {
+				BoardTile* currentTile = m_tiles[x][z];
+				PossibleMove move;
+				move.From = glm::vec2(x, z);
+				if (currentTile->m_type == eRedPiece) {
+					if (z < 6) {
+						if (x < 6) {
+							if (m_tiles[x + 2][z + 2]->m_type == eEmpty &&
+								m_tiles[x + 1][z + 1]->m_type == eBlackPiece) {
+								m_availableTakes.push_back(move);
+								m_availableTakes.back().To = glm::vec2(x + 2, z + 2);
+							}
+						}
+						if (x > 1) {
+							if (m_tiles[x - 2][z + 2]->m_type == eEmpty &&
+								m_tiles[x - 1][z + 1]->m_type == eBlackPiece) {
+								m_availableTakes.push_back(move);
+								m_availableTakes.back().To = glm::vec2(x - 2, z + 2);
+							}
+						}
+					}
+					if (currentTile->m_king && z > 1) {
+						if (x < 6) {
+							if (m_tiles[x + 2][z - 2]->m_type == eEmpty &&
+								m_tiles[x + 1][z - 1]->m_type == eBlackPiece) {
+								m_availableTakes.push_back(move);
+								m_availableTakes.back().To = glm::vec2(x + 2, z - 2);
+							}
+						}
+						if (x > 1) {
+							if (m_tiles[x - 2][z - 2]->m_type == eEmpty &&
+								m_tiles[x - 1][z - 1]->m_type == eBlackPiece) {
+								m_availableTakes.push_back(move);
+								m_availableTakes.back().To = glm::vec2(x - 2, z - 2);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+}
 
-void CheckerBoard::SetCamera(Camera* _camera) {
-	m_camera = _camera;
+bool CheckerBoard::TakeAvailable() {
+	if (m_availableTakes.size() > 0) {
+		return true;
+	}
+	return false;
+}
+void CheckerBoard::DeselectAll() {
+	for (unsigned int x = 0; x < 8; x++) {
+		for (unsigned int z = 0; z < 8; z++) {
+			m_tiles[x][z]->Deselect();
+		}
+	}
 }

@@ -59,6 +59,7 @@ private:
 	const double m_blackTargetCameraAngle = M_PI * 2;
 	double m_cameraAngle;
 	bool m_allocatedSide;
+	bool m_spinning;
 	double m_networkSleepTimer;
 };
 

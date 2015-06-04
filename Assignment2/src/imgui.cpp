@@ -10631,7 +10631,7 @@ CustomConsole* ImGui::GetCustomConsoleInstance()
 void ImGui::ShowCustomConsole(bool* opened)
 {
 	CustomConsole* console = GetCustomConsoleInstance();
-	console->Run("Console", opened);
+	console->Run("Chat", opened);
 }
 
 char* ImGui::GetConsoleBuffer()

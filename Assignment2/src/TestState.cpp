@@ -30,6 +30,7 @@ void TestState::Init(GLFWwindow* _window, GameStateManager* _gameStateManager) {
 	//m_skybox = new Skybox();
 
 	m_allocatedSide = false;
+	m_spinning = true;
 	m_networkSleepTimer = 0;
 	m_targetCameraAngle = 7.0f;
 	Gizmos::create();
@@ -108,7 +109,7 @@ void TestState::DrawGUI() {
 					m_networkClient->InitializeClient(DEFAULT_NAME, m_serverPort, (char*)m_serverIP.c_str());
 				}
 				m_checkerBoard->SetNetworkManager(m_networkClient);
-				m_networkSleepTimer = 1.0f;
+				m_networkSleepTimer = 0.2f;
 			}
 		}
 	}
@@ -134,8 +135,7 @@ void TestState::UpdateCamera(double _dt) {
 		m_cameraAngle += _dt * 0.5f;
 	}
 	else {
-		if (m_allocatedSide) {
-
+		if (m_allocatedSide && m_spinning) {
 			if (abs(m_cameraAngle - m_targetCameraAngle) >= _dt) {
 				if (m_cameraAngle >= m_targetCameraAngle) {
 					m_cameraAngle -= _dt;
@@ -143,6 +143,9 @@ void TestState::UpdateCamera(double _dt) {
 				else if (m_cameraAngle <= m_targetCameraAngle) {
 					m_cameraAngle += _dt;
 				}
+			}
+			else {
+				m_spinning = false;
 			}
 		}
 	}
